@@ -1,5 +1,5 @@
 # Structure of the file
-## Please ehance this README if you add / change something.
+## Please enhance this README if you add / change something.
 
 ### 1. Tornado path: This consists of 4 keywords separated by hifen. 
 #### a. Tornado severity
