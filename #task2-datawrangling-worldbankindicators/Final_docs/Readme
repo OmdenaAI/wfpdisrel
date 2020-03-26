@@ -1,3 +1,4 @@
 Here you'll find:
-1. WBI_Selection_Country_Year.csv     : contains final dataset to merge with cyclones
-2. Selected_Indicators.csv            : Selected Indicators from a total of 1430 indicators
+1. WBI_Selection_Country_Year.csv        : contains final dataset to merge with cyclones
+2. Selected_Indicators.csv               : Selected Indicators from a total of 1430 indicators
+3. WBI_Selection_of_Indicators.ipynb     : Jupyter Notebook that generates WBI_Selection_Country_Year.csv with Selected_Indicators.csv
