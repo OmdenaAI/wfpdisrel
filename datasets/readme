@@ -5,9 +5,8 @@ Condition: clean or workable
 documentation: if possible provide a description of the predictor and response variables
 Copyright: should be collected from public repository or have clearance from the owner of the data
 
-
-Dataset: International Hurricanes (Cyclones)</h1>
-Description:</h2>
+Dataset: International Hurricanes (Cyclones)
+Description:
 This dataset has cyclone properties for International Hurricanes: 1983-2012
 Brief description of the data columns are as below:
 
