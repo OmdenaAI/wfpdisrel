@@ -6,9 +6,9 @@ documentation: if possible provide a description of the predictor and response v
 Copyright: should be collected from public repository or have clearance from the owner of the data
 
 
-<h1>Dataset: International Hurricanes (Cyclones)</h1>
-<h2>Description:</h2>
-<p> This dataset has cyclone properties for International Hurricanes: 1983-2012
+#Dataset: International Hurricanes (Cyclones)</h1>
+##Description:</h2>
+This dataset has cyclone properties for International Hurricanes: 1983-2012
 Brief description of the data columns are as below:
 
 Date/Time: Day and time when the circulation center crosses the country's coastline (including barrier islands). Time is generally estimated to the nearest hour early in the record and to the nearest 15 minutes later in the record.
@@ -26,6 +26,6 @@ Web Result with Site Links
 
 National Oceanic and Atmospheric Administration | U.S.
 
-</p>
+
 
 
