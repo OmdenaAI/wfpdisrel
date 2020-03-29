@@ -1,6 +1,31 @@
 This folder is hosting the working datasets 
-preferable format format for the dataset is as below:
+preferable format for the dataset is as below:
 Format: CSV file
 Condition: clean or workable
 documentation: if possible provide a description of the predictor and response variables
 Copyright: should be collected from public repository or have clearance from the owner of the data
+
+
+<h1>Dataset: International Hurricanes (Cyclones)</h1>
+<h2>Description:</h2>
+<p> This dataset has cyclone properties for International Hurricanes: 1983-2012
+Brief description of the data columns are as below:
+
+Date/Time: Day and time when the circulation center crosses the country's coastline (including barrier islands). Time is generally estimated to the nearest hour early in the record and to the nearest 15 minutes later in the record.
+
+Lat/Lon: Location is estimated to the nearest 0.1 degrees latitude and longitude (~6 nm increments).
+
+Max Winds: Estimated maximum 1 min surface (10 m) winds to occur when the center made landfall. (This does not imply in all cases, especially for small islands, that these peak winds occurred on land.)
+
+Central Pressure: The minimum central pressure of the hurricane at landfall.
+
+This list only includes hurricanes that made landfall, it does not include hurricanes that passed close to land and produced hurricane-force winds. We recognize the significance of those hurricanes but for the purpose of this list, they are not included.
+
+source: Search Results
+Web Result with Site Links
+
+National Oceanic and Atmospheric Administration | U.S.
+
+</p>
+
+
