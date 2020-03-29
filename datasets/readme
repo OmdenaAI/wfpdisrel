@@ -1,0 +1,6 @@
+This folder is hosting the working datasets 
+preferable format format for the dataset is as below:
+Format: CSV file
+Condition: clean or workable
+documentation: if possible provide a description of the predictor and response variables
+Copyright: should be collected from public repository or have clearance from the owner of the data
