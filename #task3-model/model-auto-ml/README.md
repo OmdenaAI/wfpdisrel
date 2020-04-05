@@ -1,9 +1,6 @@
 # Automatic Machine Learning Solutions
 
-In this folder you can find 2 subfolders 
-* tools tests - tool usage presentation on dummy data
-* tools usage - using tools on complete dataset provided by other tasks
-
+Please create subfolders for each of the tools. It would be nice if you provided README with usage instructions for the tool.
 
 ## Tools list:
 * [Google AutoML](https://cloud.google.com/automl)
