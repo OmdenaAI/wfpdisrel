@@ -8,3 +8,4 @@ Please create subfolders for each of the tools. It would be nice if you provided
 * [Azure Automated ML](https://azure.microsoft.com/pl-pl/services/machine-learning/automatedml/)
 * [ML.NET Model Builder in VisualStudio](https://dotnet.microsoft.com/apps/machinelearning-ai/ml-dotnet/model-builder)
 * [Amazon SageMaker](https://aws.amazon.com/sagemaker/pricing/)
+* [H2O AutoML](http://docs.h2o.ai/h2o/latest-stable/h2o-docs/automl.html)
