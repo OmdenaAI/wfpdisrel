@@ -1,0 +1,7 @@
+.jupyter
+.local
+.ipython
+.ipynb_checkpoints
+.cache
+.idea
+__pycache__
