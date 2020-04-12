@@ -15,12 +15,18 @@ def evaluate_input(filename, name, year, windspeed):
     if os.path.isfile(filename):
         try:
             data = pd.read_csv(filename)
-            if windspeed not in data.columns.to_list():
-                raise Shape_Generator_Exception('Unable to find the wind speed column')
+            columns_list = data.columns.to_list()
+            req_set = set(['name', 'year', 'lat', 'long', windspeed])
+            if req_set.issubset(set(columns_list)):
+                pass
+            else:
+                raise Shape_Generator_Exception('Unable to some or all of {}, {}, {},{},{}'.format('name', 'year', 'lat', 'long', windspeed))
+            # if windspeed not in data.columns.to_list():
+            #     raise Shape_Generator_Exception('Unable to find the wind speed column')
             if ((data['name'] == name).any()) and ((data[data['name'] == name]['year'] == year).any()):
                 return 1
             else:
-                raise Shape_Generator_Exception("Unable to find the entries for {} name and {} year".format(name, year))
+                raise Shape_Generator_Exception("Unable to find matching entries for {} name and {} year".format(name, year))
         except IOError as e:
             raise Shape_Generator_Exception('Unable to read the CSV file')
     else:
@@ -119,7 +125,7 @@ class Shape_Generator:
         self.final_gdf.to_file(filename=outfile, driver="ESRI Shapefile")
     
 
-    def generate_buffered_file(self, radius):
+    def generate_buffered_file(self, radius=0):
         """
         Generate the buffered output
         :radius The required radius for the buffered output
@@ -162,4 +168,4 @@ if __name__ == '__main__':
     if args.isbuffered:
         shape_object.generate_buffered_file(args.bufferedradius)
     else:
-        shape_object.generate_center_path()
+        shape_object.generate_center_path() 
