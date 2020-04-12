@@ -10,25 +10,38 @@ import argparse
 import os.path
 
 
-def evaluate_input(args):
+def evaluate_input(filename, name, year, windspeed):
     ## Evaluate the existance of the file
-    if os.path.isfile(args.filename):
+    if os.path.isfile(filename):
         try:
-            data = pd.read_csv(args.filename)
-            if args.windspeed not in data.columns.to_list():
-                print("Unable to find the wind speed column")
-                return 0
-            if ((data['name'] == args.name).any()) and ((data['year'] == args.year).any()):
+            data = pd.read_csv(filename)
+            if windspeed not in data.columns.to_list():
+                raise Shape_Generator_Exception('Unable to find the wind speed column')
+            if ((data['name'] == name).any()) and ((data[data['name'] == name]['year'] == year).any()):
                 return 1
             else:
-                print(f"Unable to find the entries for {args.name} name or {args.year} year")
-                return 0
+                raise Shape_Generator_Exception("Unable to find the entries for {} name and {} year".format(name, year))
         except IOError as e:
-            print("Unable to read the CSV file". e)
-            return 0
+            raise Shape_Generator_Exception('Unable to read the CSV file')
     else:
-        print("Unable to find the file")
-        return 0
+        raise Shape_Generator_Exception('Unable to find the file')
+
+
+class Shape_Generator_Exception(Exception):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if args:
+            self.message = args[0]
+        else:
+            self.message = None
+    
+    def __str__(self):
+        if self.message:
+            return 'Shape Generator Exception, {}'.format(self.message)
+        else:
+            return 'Shape Generator Exception has been raised'
+        
 
 
 class Shape_Generator:
@@ -39,6 +52,7 @@ class Shape_Generator:
         :cyclone_name: name of the cyclone
         :wind_speed: Wind speed column name
         """
+        evaluate_input(file_path, cyclone_name, cyclone_year, wind_speed)
         data_df = pd.read_csv(file_path)
         cyclones = data_df[['name',
                                  'year', 'lat', 'long', wind_speed]]
@@ -144,9 +158,8 @@ if __name__ == '__main__':
     parser.add_argument('-d', "--debug", dest="debug", help="Display the dataframes and plots", default=False)
 
     args = parser.parse_args()
-    if evaluate_input(args):
-        shape_object = Shape_Generator(args.filename, args.name, args.year, args.windspeed,args.debug)
-        if (args.isbuffered):
-            shape_object.generate_buffered_file(args.bufferedradius)
-        else:
-            shape_object.generate_center_path()
+    shape_object = Shape_Generator(args.filename, args.name, args.year, args.windspeed,args.debug)
+    if args.isbuffered:
+        shape_object.generate_buffered_file(args.bufferedradius)
+    else:
+        shape_object.generate_center_path()
