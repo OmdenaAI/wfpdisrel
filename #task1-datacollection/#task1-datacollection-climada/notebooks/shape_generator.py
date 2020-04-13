@@ -8,6 +8,32 @@ from geopandas import GeoDataFrame
 from shapely.geometry import Point, LineString, Polygon
 import argparse
 import os.path
+import rasterio
+from rasterio.mask import mask
+from rasterstats import zonal_stats
+import fiona
+import re
+
+
+"""
+Usage: shape_generator.py [-h] -f FILENAME -n NAME -y YEAR -w WINDSPEED
+                          [-b ISBUFFERED] [-r BUFFEREDRADIUS]
+                          [-g GENERATESHAPEFILE] [-d DEBUG]
+
+The options in the square brackets are optional
+-f /test/test.csv
+-n IVAN
+-y 2004
+-w max_50
+-b 0 for centerpath and 1 for buffered
+-r buffered radius
+-g True/False for generating the shape files
+-d True/False to display intermediate results
+
+eg: python3 shape_generator.py -f /test/test.csv -n IVAN -y 2004 -w max_50 -b 1 -r 150 -g True
+
+generates both the shapefiles and maskedfile for buffered result with radius 150 and prints the total population
+"""
 
 
 def evaluate_input(filename, name, year, windspeed):
@@ -33,6 +59,62 @@ def evaluate_input(filename, name, year, windspeed):
         raise Shape_Generator_Exception('Unable to find the file')
 
 
+def population_calculator(custom_df,filename, cyclone_year,extension,debug=False):
+    """
+    Generates the masked tif file and returns the sum
+    :custom_df :: Geopandas dataframe from the shape_generator class
+    :filename :: Full filename with extension
+    :cyclone_year :: Year of the cyclone
+    :extension :: extension created from the shape_generator/custom label for masked file
+    :debug :: To view intermediate results
+    :returns :: Total population
+    """
+
+
+    geoms = custom_df.geometry.values
+    if debug:
+        print(custom_df.head())
+        print(geoms)
+
+    ##  have a list of the years of available tiff file
+    ## Find the nearest year to the cyclone_year
+    search_path = os.path.split(filename)[0]
+    try:
+        if search_path == '':
+            search_path = "./"
+        source_tif_files = [int(os.path.splitext(files)[0]) for files in os.listdir(search_path) if re.match(r'[0-9][0-9][0-9][0-9].tif',files)]
+    except:
+        print("Unable to find the source tif files in except")
+        exit(1)
+    if len(source_tif_files) < 1:
+        print("Unable to find the source tif files")
+        exit(1)
+    difference_map = [abs(cyclone_year - year) for year in source_tif_files]
+    selected_tif_file = difference_map.index(min(difference_map))
+    selected_tif_file = "{}.tif".format(source_tif_files[selected_tif_file])
+    selected_tif_file = os.path.join(search_path, selected_tif_file)
+
+    # load the raster, mask it by the polygon and crop it
+    with rasterio.open(selected_tif_file) as src:
+        out_image, out_transform = mask(src, geoms, crop=True)
+        out_meta = src.meta.copy()
+    if debug:
+        print(out_meta)
+    # save the resulting raster  
+    out_meta.update({"driver": "GTiff",
+        "height": out_image.shape[1],
+        "width": out_image.shape[2],
+        "transform": out_transform})
+    
+    #Creates cropped as a new tif file
+    maskedfilename = os.path.join(search_path, "{}_masked.tif".format(extension))
+    with rasterio.open(maskedfilename, "w", **out_meta) as dest:
+        dest.write(out_image)
+    stats = ['sum']
+    result = zonal_stats(custom_df, maskedfilename, stats = stats)
+    return result
+
+
 class Shape_Generator_Exception(Exception):
 
     def __init__(self, *args, **kwargs):
@@ -48,7 +130,6 @@ class Shape_Generator_Exception(Exception):
         else:
             return 'Shape Generator Exception has been raised'
         
-
 
 class Shape_Generator:
     def __init__(self, file_path, cyclone_name, cyclone_year, wind_speed, debug=False):
@@ -70,6 +151,7 @@ class Shape_Generator:
         self.wind_speed = wind_speed
         self.dest_path = os.path.split(file_path)[0]
         self.debug = debug
+        self.extension = f"{self.cyclone_name}_{self.cyclone_year}_{self.wind_speed}_"
         if self.debug:
             print("Dataframe after filtering ", self.cyclone_df.head())
         self.cyclone_gdf = self.__generate_geopandas_df__(self.cyclone_df)
@@ -85,7 +167,7 @@ class Shape_Generator:
         geometry = [Point(xy) for xy in zip(df.long, df.lat)]
         return GeoDataFrame(df, geometry=geometry)
     
-    def generate_center_path(self, generateFile=True):
+    def generate_center_path(self, generateFile=False):
         """
         Generate the output files for centerpath
         :generateFile : True/False to generate the files using the computed centerpath
@@ -105,17 +187,18 @@ class Shape_Generator:
                 plt.show(block=False)
         if (final_gdf.crs == None):
             final_gdf.crs = "epsg:4326"
-        extension = "centerpath.shp"
+        self.extension += "centerpath"
         self.final_gdf = final_gdf
         if generateFile:
-            self.generate_shapefile(extension)
+            self.generate_shapefile()
+        return self.final_gdf
 
-    def generate_shapefile(self, extension):
+    def generate_shapefile(self):
         """
         Generate the output files from the geopandas dataframe
         :extension: extension of the output file
         """
-        filename = f"{self.cyclone_name}_{self.cyclone_year}_{self.wind_speed}_{extension}"
+        filename = self.extension + ".shp"
         if (self.dest_path != ''):
             outfile = os.path.join(self.dest_path, filename)
         else:
@@ -125,7 +208,7 @@ class Shape_Generator:
         self.final_gdf.to_file(filename=outfile, driver="ESRI Shapefile")
     
 
-    def generate_buffered_file(self, radius=0):
+    def generate_buffered_file(self, radius=0, generateFile=False):
         """
         Generate the buffered output
         :radius The required radius for the buffered output
@@ -149,8 +232,10 @@ class Shape_Generator:
             buffered_cyclone_gdf.plot()
             plt.show()
         self.final_gdf = buffered_cyclone_gdf
-        extension = f"{buffer_radius}_buffered.shp"        
-        self.generate_shapefile(extension)
+        self.extension += f"{buffer_radius}_buffered"
+        if generateFile:
+            self.generate_shapefile()
+        return self.final_gdf
 
 
 if __name__ == '__main__':
@@ -161,11 +246,15 @@ if __name__ == '__main__':
     parser.add_argument("-w", "--windspeed",dest = "windspeed", help="Wind Speed column name", required=True)
     parser.add_argument("-b", "--isbuffered", dest="isbuffered", help="Centerpath : 0 / buffered : 1", type=int, default=0)
     parser.add_argument("-r", "--bufferedradius", dest="bufferedradius", help="buffered radius", default=0, type=int)
+    parser.add_argument("-g", "--generateshapefile", dest="generateshapefile", help="generate shape file", default=False, type=bool)
     parser.add_argument('-d', "--debug", dest="debug", help="Display the dataframes and plots", default=False)
 
     args = parser.parse_args()
     shape_object = Shape_Generator(args.filename, args.name, args.year, args.windspeed,args.debug)
+    output = ''
     if args.isbuffered:
-        shape_object.generate_buffered_file(args.bufferedradius)
+        output = shape_object.generate_buffered_file(radius = args.bufferedradius,generateFile=args.generateshapefile)
     else:
-        shape_object.generate_center_path() 
+        output = shape_object.generate_center_path(generateFile=args.generateshapefile)
+    print(population_calculator(output, args.filename, args.year, shape_object.extension))
+    
