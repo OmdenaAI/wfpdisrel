@@ -5,3 +5,4 @@
 .cache
 .idea
 __pycache__
+.bash_history
