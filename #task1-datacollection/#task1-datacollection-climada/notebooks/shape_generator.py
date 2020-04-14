@@ -84,7 +84,7 @@ def population_calculator(custom_df,filename, cyclone_year,extension,debug=False
             search_path = "./"
         source_tif_files = [int(os.path.splitext(files)[0]) for files in os.listdir(search_path) if re.match(r'[0-9][0-9][0-9][0-9].tif',files)]
     except:
-        print("Unable to find the source tif files in except")
+        print("Error processing the files in the directory")
         exit(1)
     if len(source_tif_files) < 1:
         print("Unable to find the source tif files")
@@ -215,6 +215,7 @@ class Shape_Generator:
         """
         # generate the centerpath first and make it buffered
         self.generate_center_path(generateFile=False)
+        buffer_radius = radius
         # If no radius is mentioned
         if radius == 0:
             # compute mean
