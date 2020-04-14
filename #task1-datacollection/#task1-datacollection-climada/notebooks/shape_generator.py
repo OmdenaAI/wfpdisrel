@@ -35,6 +35,16 @@ eg: python3 shape_generator.py -f /test/test.csv -n IVAN -y 2004 -w max_50 -b 1 
 generates both the shapefiles and maskedfile for buffered result with radius 150 and prints the total population
 """
 
+def decide_target_loc(source_path):
+    current_path = os.getcwd()
+    dest_path = os.path.abspath(os.path.join(current_path, "../data"))
+    if os.path.exists(dest_path):
+        return dest_path
+    dest_path = os.path.split(source_path)[0]
+    dest_path = os.path.join(dest_path, 'shape_files')
+    if not os.path.exists(dest_path):
+        os.mkdir(dest_path)
+    return dest_path
 
 def evaluate_input(filename, name, year, windspeed):
     ## Evaluate the existance of the file
@@ -71,48 +81,63 @@ def population_calculator(custom_df,filename, cyclone_year,extension,debug=False
     """
 
 
-    geoms = custom_df.geometry.values
-    if debug:
-        print(custom_df.head())
-        print(geoms)
+    # geoms = custom_df.geometry.values
+    # if debug:
+    #     print(custom_df.head())
+    #     print(geoms)
 
     ##  have a list of the years of available tiff file
     ## Find the nearest year to the cyclone_year
+    ## 2010.tif, 2000.tif
+
     search_path = os.path.split(filename)[0]
+    dest_path = decide_target_loc(filename)
     try:
         if search_path == '':
             search_path = "./"
-        source_tif_files = [int(os.path.splitext(files)[0]) for files in os.listdir(search_path) if re.match(r'[0-9][0-9][0-9][0-9].tif',files)]
+        source_tif_files = [os.path.split(files)[1] for files in os.listdir(search_path) if re.match(r'.*_[0-9][0-9][0-9][0-9]_30_sec.tif',files)]
+        source_tif_files_years = [int(re.findall('\d+',x)[-2]) for x in source_tif_files]
     except:
         print("Error processing the files in the directory")
         exit(1)
     if len(source_tif_files) < 1:
         print("Unable to find the source tif files")
         exit(1)
-    difference_map = [abs(cyclone_year - year) for year in source_tif_files]
+    difference_map = [abs(cyclone_year - year) for year in source_tif_files_years]
     selected_tif_file = difference_map.index(min(difference_map))
-    selected_tif_file = "{}.tif".format(source_tif_files[selected_tif_file])
+    selected_tif_file = "{}".format(source_tif_files[selected_tif_file])
     selected_tif_file = os.path.join(search_path, selected_tif_file)
 
-    # load the raster, mask it by the polygon and crop it
-    with rasterio.open(selected_tif_file) as src:
-        out_image, out_transform = mask(src, geoms, crop=True)
-        out_meta = src.meta.copy()
-    if debug:
-        print(out_meta)
-    # save the resulting raster  
-    out_meta.update({"driver": "GTiff",
-        "height": out_image.shape[1],
-        "width": out_image.shape[2],
-        "transform": out_transform})
+    # Code for creating masked files
+    # # load the raster, mask it by the polygon and crop it
+    # with rasterio.open(selected_tif_file) as src:
+    #     out_image, out_transform = mask(src, geoms, crop=True)
+    #     out_meta = src.meta.copy()
+    # if debug:
+    #     print(out_meta)
+    # # save the resulting raster  
+    # out_meta.update({"driver": "GTiff",
+    #     "height": out_image.shape[1],
+    #     "width": out_image.shape[2],
+    #     "transform": out_transform})
     
-    #Creates cropped as a new tif file
-    maskedfilename = os.path.join(search_path, "{}_masked.tif".format(extension))
-    with rasterio.open(maskedfilename, "w", **out_meta) as dest:
-        dest.write(out_image)
-    stats = ['sum']
-    result = zonal_stats(custom_df, maskedfilename, stats = stats)
-    return result
+    # #Creates cropped as a new tif file
+    # maskedfilename = os.path.join(dest_path, "{}_masked.tif".format(extension))
+    # with rasterio.open(maskedfilename, "w", **out_meta) as dest:
+    #     dest.write(out_image)
+    with rasterio.open(selected_tif_file) as sourcetif:
+        raster_file_crs = str(sourcetif.crs).lower()
+    stats = ['min', 'max', 'mean', 'sum']
+    shape_file_crs = custom_df.crs
+    if debug:
+        print('shape files crs is {}'.format(shape_file_crs))
+        print('source tif file crs is {}'.format(raster_file_crs))
+    assert shape_file_crs == raster_file_crs
+    result = zonal_stats(custom_df, selected_tif_file, stats = stats)
+    if debug:
+        print('result is {}'.format(result))
+    population = result[0]['sum']
+    return population
 
 
 class Shape_Generator_Exception(Exception):
@@ -140,6 +165,7 @@ class Shape_Generator:
         :wind_speed: Wind speed column name
         """
         evaluate_input(file_path, cyclone_name, cyclone_year, wind_speed)
+        self.dest_path = decide_target_loc(file_path)
         data_df = pd.read_csv(file_path)
         cyclones = data_df[['name',
                                  'year', 'lat', 'long', wind_speed]]
@@ -149,7 +175,7 @@ class Shape_Generator:
         self.cyclone_name = cyclone_name
         self.cyclone_year = cyclone_year
         self.wind_speed = wind_speed
-        self.dest_path = os.path.split(file_path)[0]
+        # self.dest_path = os.path.split(file_path)[0]
         self.debug = debug
         self.extension = f"{self.cyclone_name}_{self.cyclone_year}_{self.wind_speed}_"
         if self.debug:
@@ -206,6 +232,7 @@ class Shape_Generator:
         if self.debug:
             print(f"outfile is {outfile}")
         self.final_gdf.to_file(filename=outfile, driver="ESRI Shapefile")
+        print("Successfully created Shape files in {}".format(self.dest_path))
     
 
     def generate_buffered_file(self, radius=0, generateFile=False):
@@ -215,6 +242,7 @@ class Shape_Generator:
         """
         # generate the centerpath first and make it buffered
         self.generate_center_path(generateFile=False)
+        self.extension = '_'.join(self.extension.split('_')[:-1])
         buffer_radius = radius
         # If no radius is mentioned
         if radius == 0:
@@ -233,7 +261,7 @@ class Shape_Generator:
             buffered_cyclone_gdf.plot()
             plt.show()
         self.final_gdf = buffered_cyclone_gdf
-        self.extension += f"{buffer_radius}_buffered"
+        self.extension += f"_{buffer_radius}_buffered"
         if generateFile:
             self.generate_shapefile()
         return self.final_gdf
