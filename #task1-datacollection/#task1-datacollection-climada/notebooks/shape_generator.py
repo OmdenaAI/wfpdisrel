@@ -69,75 +69,75 @@ def evaluate_input(filename, name, year, windspeed):
         raise Shape_Generator_Exception('Unable to find the file')
 
 
-def population_calculator(custom_df,filename, cyclone_year,extension,debug=False):
-    """
-    Generates the masked tif file and returns the sum
-    :custom_df :: Geopandas dataframe from the shape_generator class
-    :filename :: Full filename with extension
-    :cyclone_year :: Year of the cyclone
-    :extension :: extension created from the shape_generator/custom label for masked file
-    :debug :: To view intermediate results
-    :returns :: Total population
-    """
+# def population_calculator(custom_df,filename, cyclone_year,extension,debug=False):
+#     """
+#     Generates the masked tif file and returns the sum
+#     :custom_df :: Geopandas dataframe from the shape_generator class
+#     :filename :: Full filename with extension
+#     :cyclone_year :: Year of the cyclone
+#     :extension :: extension created from the shape_generator/custom label for masked file
+#     :debug :: To view intermediate results
+#     :returns :: Total population
+#     """
 
 
-    # geoms = custom_df.geometry.values
-    # if debug:
-    #     print(custom_df.head())
-    #     print(geoms)
+#     # geoms = custom_df.geometry.values
+#     # if debug:
+#     #     print(custom_df.head())
+#     #     print(geoms)
 
-    ##  have a list of the years of available tiff file
-    ## Find the nearest year to the cyclone_year
-    ## 2010.tif, 2000.tif
+#     ##  have a list of the years of available tiff file
+#     ## Find the nearest year to the cyclone_year
+#     ## 2010.tif, 2000.tif
 
-    search_path = os.path.split(filename)[0]
-    dest_path = decide_target_loc(filename)
-    try:
-        if search_path == '':
-            search_path = "./"
-        source_tif_files = [os.path.split(files)[1] for files in os.listdir(search_path) if re.match(r'.*_[0-9][0-9][0-9][0-9]_30_sec.tif',files)]
-        source_tif_files_years = [int(re.findall('\d+',x)[-2]) for x in source_tif_files]
-    except:
-        print("Error processing the files in the directory")
-        exit(1)
-    if len(source_tif_files) < 1:
-        print("Unable to find the source tif files")
-        exit(1)
-    difference_map = [abs(cyclone_year - year) for year in source_tif_files_years]
-    selected_tif_file = difference_map.index(min(difference_map))
-    selected_tif_file = "{}".format(source_tif_files[selected_tif_file])
-    selected_tif_file = os.path.join(search_path, selected_tif_file)
+#     search_path = os.path.split(filename)[0]
+#     dest_path = decide_target_loc(filename)
+#     try:
+#         if search_path == '':
+#             search_path = "./"
+#         source_tif_files = [os.path.split(files)[1] for files in os.listdir(search_path) if re.match(r'.*_[0-9][0-9][0-9][0-9]_30_sec.tif',files)]
+#         source_tif_files_years = [int(re.findall('\d+',x)[-2]) for x in source_tif_files]
+#     except:
+#         print("Error processing the files in the directory")
+#         exit(1)
+#     if len(source_tif_files) < 1:
+#         print("Unable to find the source tif files")
+#         exit(1)
+#     difference_map = [abs(cyclone_year - year) for year in source_tif_files_years]
+#     selected_tif_file = difference_map.index(min(difference_map))
+#     selected_tif_file = "{}".format(source_tif_files[selected_tif_file])
+#     selected_tif_file = os.path.join(search_path, selected_tif_file)
 
-    # Code for creating masked files
-    # # load the raster, mask it by the polygon and crop it
-    # with rasterio.open(selected_tif_file) as src:
-    #     out_image, out_transform = mask(src, geoms, crop=True)
-    #     out_meta = src.meta.copy()
-    # if debug:
-    #     print(out_meta)
-    # # save the resulting raster  
-    # out_meta.update({"driver": "GTiff",
-    #     "height": out_image.shape[1],
-    #     "width": out_image.shape[2],
-    #     "transform": out_transform})
+#     # Code for creating masked files
+#     # # load the raster, mask it by the polygon and crop it
+#     # with rasterio.open(selected_tif_file) as src:
+#     #     out_image, out_transform = mask(src, geoms, crop=True)
+#     #     out_meta = src.meta.copy()
+#     # if debug:
+#     #     print(out_meta)
+#     # # save the resulting raster  
+#     # out_meta.update({"driver": "GTiff",
+#     #     "height": out_image.shape[1],
+#     #     "width": out_image.shape[2],
+#     #     "transform": out_transform})
     
-    # #Creates cropped as a new tif file
-    # maskedfilename = os.path.join(dest_path, "{}_masked.tif".format(extension))
-    # with rasterio.open(maskedfilename, "w", **out_meta) as dest:
-    #     dest.write(out_image)
-    with rasterio.open(selected_tif_file) as sourcetif:
-        raster_file_crs = str(sourcetif.crs).lower()
-    stats = ['min', 'max', 'mean', 'sum']
-    shape_file_crs = custom_df.crs
-    if debug:
-        print('shape files crs is {}'.format(shape_file_crs))
-        print('source tif file crs is {}'.format(raster_file_crs))
-    assert shape_file_crs == raster_file_crs
-    result = zonal_stats(custom_df, selected_tif_file, stats = stats)
-    if debug:
-        print('result is {}'.format(result))
-    population = result[0]['sum']
-    return population
+#     # #Creates cropped as a new tif file
+#     # maskedfilename = os.path.join(dest_path, "{}_masked.tif".format(extension))
+#     # with rasterio.open(maskedfilename, "w", **out_meta) as dest:
+#     #     dest.write(out_image)
+#     with rasterio.open(selected_tif_file) as sourcetif:
+#         raster_file_crs = str(sourcetif.crs).lower()
+#     stats = ['min', 'max', 'mean', 'sum']
+#     shape_file_crs = custom_df.crs
+#     if debug:
+#         print('shape files crs is {}'.format(shape_file_crs))
+#         print('source tif file crs is {}'.format(raster_file_crs))
+#     assert shape_file_crs == raster_file_crs
+#     result = zonal_stats(custom_df, selected_tif_file, stats = stats)
+#     if debug:
+#         print('result is {}'.format(result))
+#     population = result[0]['sum']
+#     return population
 
 
 class Shape_Generator_Exception(Exception):
@@ -175,12 +175,14 @@ class Shape_Generator:
         self.cyclone_name = cyclone_name
         self.cyclone_year = cyclone_year
         self.wind_speed = wind_speed
+        self.filename = file_path
         # self.dest_path = os.path.split(file_path)[0]
         self.debug = debug
         self.extension = f"{self.cyclone_name}_{self.cyclone_year}_{self.wind_speed}_"
         if self.debug:
             print("Dataframe after filtering ", self.cyclone_df.head())
         self.cyclone_gdf = self.__generate_geopandas_df__(self.cyclone_df)
+        self.final_gdf = pd.DataFrame()
         pass
 
     @staticmethod
@@ -267,6 +269,74 @@ class Shape_Generator:
         return self.final_gdf
 
 
+class Population_Calculator(Shape_Generator):
+    def __init__(self, file_path, cyclone_name, cyclone_year, wind_speed, debug=False):
+        super().__init__(file_path, cyclone_name, cyclone_year, wind_speed, debug=debug)
+
+    def get_population(self):
+
+        if self.final_gdf.empty:
+            self.generate_center_path(generateFile=False)
+
+        # geoms = custom_df.geometry.values
+        # if debug:
+        #     print(custom_df.head())
+        #     print(geoms)
+
+        ##  have a list of the years of available tiff file
+        ## Find the nearest year to the cyclone_year
+        ## 2010.tif, 2000.tif
+        search_path = os.path.split(self.filename)[0]
+        if os.path.exists(os.path.join(search_path, 'gridded_population_data')):
+            search_path = os.path.join(search_path, 'gridded_population_data')
+        try:
+            if search_path == '':
+                search_path = "./"
+            source_tif_files = [os.path.split(files)[1] for files in os.listdir(search_path) if re.match(r'.*_[0-9][0-9][0-9][0-9]_30_sec.tif',files)]
+            source_tif_files_years = [int(re.findall('\d+',x)[-2]) for x in source_tif_files]
+        except:
+            print("Error processing the files in the directory")
+            exit(1)
+        if len(source_tif_files) < 1:
+            print("Unable to find the source tif files")
+            exit(1)
+        difference_map = [abs(self.cyclone_year - year) for year in source_tif_files_years]
+        selected_tif_file = difference_map.index(min(difference_map))
+        selected_tif_file = "{}".format(source_tif_files[selected_tif_file])
+        selected_tif_file = os.path.join(search_path, selected_tif_file)
+
+        # Code for creating masked files
+        # # load the raster, mask it by the polygon and crop it
+        # with rasterio.open(selected_tif_file) as src:
+        #     out_image, out_transform = mask(src, geoms, crop=True)
+        #     out_meta = src.meta.copy()
+        # if debug:
+        #     print(out_meta)
+        # # save the resulting raster  
+        # out_meta.update({"driver": "GTiff",
+        #     "height": out_image.shape[1],
+        #     "width": out_image.shape[2],
+        #     "transform": out_transform})
+    
+        # #Creates cropped as a new tif file
+        # maskedfilename = os.path.join(dest_path, "{}_masked.tif".format(extension))
+        # with rasterio.open(maskedfilename, "w", **out_meta) as dest:
+        #     dest.write(out_image)
+        with rasterio.open(selected_tif_file) as sourcetif:
+            raster_file_crs = str(sourcetif.crs).lower()
+            stats = ['min', 'max', 'mean', 'sum']
+            shape_file_crs = self.final_gdf.crs
+            if self.debug:
+                print('shape files crs is {}'.format(shape_file_crs))
+                print('source tif file crs is {}'.format(raster_file_crs))
+            assert shape_file_crs == raster_file_crs
+        result = zonal_stats(self.final_gdf, selected_tif_file, stats = stats)
+        if self.debug:
+            print('result is {}'.format(result))
+        population = result[0]['sum']
+        return population
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate a shape file')
     parser.add_argument("-f", "--filename", dest = "filename", help="Input datafile",required=True)
@@ -279,11 +349,17 @@ if __name__ == '__main__':
     parser.add_argument('-d', "--debug", dest="debug", help="Display the dataframes and plots", default=False)
 
     args = parser.parse_args()
-    shape_object = Shape_Generator(args.filename, args.name, args.year, args.windspeed,args.debug)
+    # shape_object = Shape_Generator(args.filename, args.name, args.year, args.windspeed,args.debug)
+    # output = ''
+    # if args.isbuffered:
+    #     output = shape_object.generate_buffered_file(radius = args.bufferedradius,generateFile=args.generateshapefile)
+    # else:
+    #     output = shape_object.generate_center_path(generateFile=args.generateshapefile)
+    # print(population_calculator(output, args.filename, args.year, shape_object.extension))
+    pop_object = Population_Calculator(args.filename, args.name, args.year, args.windspeed, args.debug)
     output = ''
     if args.isbuffered:
-        output = shape_object.generate_buffered_file(radius = args.bufferedradius,generateFile=args.generateshapefile)
+        output = pop_object.generate_buffered_file(radius=args.bufferedradius, generateFile=args.generateshapefile)
     else:
-        output = shape_object.generate_center_path(generateFile=args.generateshapefile)
-    print(population_calculator(output, args.filename, args.year, shape_object.extension))
-    
+        output = pop_object.generate_center_path(generateFile=args.generateshapefile)
+    print(pop_object.get_population())
