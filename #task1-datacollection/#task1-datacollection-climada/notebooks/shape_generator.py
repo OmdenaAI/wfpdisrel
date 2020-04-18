@@ -287,8 +287,8 @@ class Population_Calculator(Shape_Generator):
         ## Find the nearest year to the cyclone_year
         ## 2010.tif, 2000.tif
         search_path = os.path.split(self.filename)[0]
-        if os.path.exists(os.path.join(search_path, 'Gridded Population of the World(GPW)')):
-            search_path = os.path.join(search_path, 'Gridded Population of the World(GPW)')
+        if os.path.exists(os.path.join(search_path, 'Gridded Population of the World (GPW)')):
+            search_path = os.path.join(search_path, 'Gridded Population of the World (GPW)')
         try:
             if search_path == '':
                 search_path = "./"
