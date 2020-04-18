@@ -68,76 +68,27 @@ def evaluate_input(filename, name, year, windspeed):
     else:
         raise Shape_Generator_Exception('Unable to find the file')
 
+def select_raster_file(cyclone_year,filepath):
 
-# def population_calculator(custom_df,filename, cyclone_year,extension,debug=False):
-#     """
-#     Generates the masked tif file and returns the sum
-#     :custom_df :: Geopandas dataframe from the shape_generator class
-#     :filename :: Full filename with extension
-#     :cyclone_year :: Year of the cyclone
-#     :extension :: extension created from the shape_generator/custom label for masked file
-#     :debug :: To view intermediate results
-#     :returns :: Total population
-#     """
-
-
-#     # geoms = custom_df.geometry.values
-#     # if debug:
-#     #     print(custom_df.head())
-#     #     print(geoms)
-
-#     ##  have a list of the years of available tiff file
-#     ## Find the nearest year to the cyclone_year
-#     ## 2010.tif, 2000.tif
-
-#     search_path = os.path.split(filename)[0]
-#     dest_path = decide_target_loc(filename)
-#     try:
-#         if search_path == '':
-#             search_path = "./"
-#         source_tif_files = [os.path.split(files)[1] for files in os.listdir(search_path) if re.match(r'.*_[0-9][0-9][0-9][0-9]_30_sec.tif',files)]
-#         source_tif_files_years = [int(re.findall('\d+',x)[-2]) for x in source_tif_files]
-#     except:
-#         print("Error processing the files in the directory")
-#         exit(1)
-#     if len(source_tif_files) < 1:
-#         print("Unable to find the source tif files")
-#         exit(1)
-#     difference_map = [abs(cyclone_year - year) for year in source_tif_files_years]
-#     selected_tif_file = difference_map.index(min(difference_map))
-#     selected_tif_file = "{}".format(source_tif_files[selected_tif_file])
-#     selected_tif_file = os.path.join(search_path, selected_tif_file)
-
-#     # Code for creating masked files
-#     # # load the raster, mask it by the polygon and crop it
-#     # with rasterio.open(selected_tif_file) as src:
-#     #     out_image, out_transform = mask(src, geoms, crop=True)
-#     #     out_meta = src.meta.copy()
-#     # if debug:
-#     #     print(out_meta)
-#     # # save the resulting raster  
-#     # out_meta.update({"driver": "GTiff",
-#     #     "height": out_image.shape[1],
-#     #     "width": out_image.shape[2],
-#     #     "transform": out_transform})
-    
-#     # #Creates cropped as a new tif file
-#     # maskedfilename = os.path.join(dest_path, "{}_masked.tif".format(extension))
-#     # with rasterio.open(maskedfilename, "w", **out_meta) as dest:
-#     #     dest.write(out_image)
-#     with rasterio.open(selected_tif_file) as sourcetif:
-#         raster_file_crs = str(sourcetif.crs).lower()
-#     stats = ['min', 'max', 'mean', 'sum']
-#     shape_file_crs = custom_df.crs
-#     if debug:
-#         print('shape files crs is {}'.format(shape_file_crs))
-#         print('source tif file crs is {}'.format(raster_file_crs))
-#     assert shape_file_crs == raster_file_crs
-#     result = zonal_stats(custom_df, selected_tif_file, stats = stats)
-#     if debug:
-#         print('result is {}'.format(result))
-#     population = result[0]['sum']
-#     return population
+    search_path = os.path.split(filepath)[0]
+    if os.path.exists(os.path.join(search_path, 'Gridded Population of the World (GPW)')):
+        search_path = os.path.join(search_path, 'Gridded Population of the World (GPW)')
+    try:
+        if search_path == '':
+            search_path = "./"
+        source_tif_files = [os.path.split(files)[1] for files in os.listdir(search_path) if re.match(r'.*_[0-9][0-9][0-9][0-9]_30_sec.tif',files)]
+        source_tif_files_years = [int(re.findall('\d+',x)[-2]) for x in source_tif_files]
+    except:
+        print("Error processing the files in the directory")
+        exit(1)
+    if len(source_tif_files) < 1:
+        print("Unable to find the source tif files")
+        exit(1)
+    difference_map = [abs(cyclone_year - year) for year in source_tif_files_years]
+    selected_tif_file = difference_map.index(min(difference_map))
+    selected_tif_file = "{}".format(source_tif_files[selected_tif_file])
+    selected_tif_file = os.path.join(search_path, selected_tif_file)
+    return selected_tif_file
 
 
 class Shape_Generator_Exception(Exception):
@@ -286,25 +237,7 @@ class Population_Calculator(Shape_Generator):
         ##  have a list of the years of available tiff file
         ## Find the nearest year to the cyclone_year
         ## 2010.tif, 2000.tif
-        search_path = os.path.split(self.filename)[0]
-        if os.path.exists(os.path.join(search_path, 'Gridded Population of the World (GPW)')):
-            search_path = os.path.join(search_path, 'Gridded Population of the World (GPW)')
-        try:
-            if search_path == '':
-                search_path = "./"
-            source_tif_files = [os.path.split(files)[1] for files in os.listdir(search_path) if re.match(r'.*_[0-9][0-9][0-9][0-9]_30_sec.tif',files)]
-            source_tif_files_years = [int(re.findall('\d+',x)[-2]) for x in source_tif_files]
-        except:
-            print("Error processing the files in the directory")
-            exit(1)
-        if len(source_tif_files) < 1:
-            print("Unable to find the source tif files")
-            exit(1)
-        difference_map = [abs(self.cyclone_year - year) for year in source_tif_files_years]
-        selected_tif_file = difference_map.index(min(difference_map))
-        selected_tif_file = "{}".format(source_tif_files[selected_tif_file])
-        selected_tif_file = os.path.join(search_path, selected_tif_file)
-
+        selected_tif_file = select_raster_file(self.cyclone_year, self.filename)
         # Code for creating masked files
         # # load the raster, mask it by the polygon and crop it
         # with rasterio.open(selected_tif_file) as src:
