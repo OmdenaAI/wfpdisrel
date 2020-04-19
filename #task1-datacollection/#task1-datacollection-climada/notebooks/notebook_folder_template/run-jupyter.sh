@@ -6,7 +6,7 @@ if [ "$NUMBER" == "" ]; then
 fi
 
 PORT="8888"
-RELATIVE_TO_GIT_ROOT=${PWD/"$(git rev-parse --show-toplevel)/"/}
+RELATIVE_TO_GIT_ROOT=$(git rev-parse --show-prefix)
 RELATIVE_TO_GIT_ROOT=${RELATIVE_TO_GIT_ROOT//#/%23}
 
 docker build -t "jupyter-$NUMBER" --build-arg MAPPED_PORT=$PORT --build-arg RELATIVE_PATH=$RELATIVE_TO_GIT_ROOT .

@@ -20,4 +20,4 @@ ARG MAPPED_PORT="8888"
 ENV MAPPED_PORT=${MAPPED_PORT}
 ENV JUPYTER_TOKEN="1"
 
-CMD echo "\n==> use url found below:\nhttp://127.0.0.1:$MAPPED_PORT/lab/tree/README.md?file-browser-path=$RELATIVE_PATH&token=1 \n" && start-notebook.sh 
+CMD echo "\n==> use url found below:\nhttp://127.0.0.1:$MAPPED_PORT/lab/tree/README.md?token=1&file-browser-path=$RELATIVE_PATH \n" && start-notebook.sh 
