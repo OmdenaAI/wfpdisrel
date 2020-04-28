@@ -11,6 +11,6 @@
 After dropping the feature ``TOTAL_DEATHS`` from our data, and considering also the HDI data, we can see below the variables than have more importance in our primer model:
 
 ![Feature importance](Plots/feature_importance.png)
-
+4. Joseph designed a random forest utilizing minmax scaler, standard scaler and PCA to improve performance. However, algorithm still needs improvement.
 
 
