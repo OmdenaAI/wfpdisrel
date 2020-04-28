@@ -1,2 +1,3 @@
 1. Dev created a neural net model using fastai for pytorch.
-2.Joseph improved Dev's model by adding more indicators and also adjusting the neural network model parameters.
+2. Joseph improved Dev's model by adding more indicators and also adjusting the neural network model parameters.
+3. Cydal built a basic neural network model utilizing sklearn essembles and pytorch.
