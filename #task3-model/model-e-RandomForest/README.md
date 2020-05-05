@@ -15,7 +15,6 @@ After dropping the feature ``TOTAL_DEATHS`` from our data, and considering also 
 4. Joseph designed a random forest utilizing minmax scaler, standard scaler and PCA to improve performance. However, algorithm still needs improvement.
 
 5. Fabi added improved versions of model_validator and model_validator_log functions. Also there are more insights regarding the importance of the features regarding landing of cyclones. New plot created with plotly is added. 
-
 ![Landing cyclones](Plots/cyclones_landing.png)
 
 6. Due tho the high presence of outliers in the target variable, **no hyperparameter tunning would be helpful**. This is a problem wth the nature of data itself. Maybe next step could be getting ride of outliers using HQR or applying this model to different clusters.
