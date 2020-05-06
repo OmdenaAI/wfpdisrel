@@ -20,6 +20,6 @@ After dropping the feature ``TOTAL_DEATHS`` from our data, and considering also 
 Also, we have an updated version of feature importance after the last version of main dataset.
 ![Features](Plots/Feature_importance_v2.png)
 
-Due tho the high presence of outliers in the target variable, we think no hyperparameter tunning would improve the metrics in a considerable scale. Waht we are seeing here is a problem wth the nature of data itself. Maybe next step could be getting ride of outliers using HQR or applying this model to different clusters.
+Due tho the high presence of outliers in the target variable, we think no hyperparameter tunning would improve the metrics in a considerable scale. What we are seeing here is a problem wth the nature of data itself. Maybe next step could be getting ride of outliers using HQR or applying this model to different clusters.
 
 
