@@ -151,6 +151,8 @@ def load_data(data_url):
     data.rename(lowercase, axis='columns', inplace=True)
     return data
 
+
+
 # utilities for cleaning the data
 def agg_coords(series):
     coords_list = series.tolist()
@@ -261,76 +263,12 @@ if __name__ == "__main__":
     lst_lat, lst_lon = data["lat"].tolist(),data["lon"].tolist()
     st.title("Visualization of Cyclone path")
     
-
-    layer_34 = pdk.Layer(
-
-            "ScatterplotLayer",
-            data=data[['usa_r34_m', 'lat', 'lon']],
-            pickable=True,
-                    opacity=0.008,
-                    stroked=True,
-                    filled=True,
-                    
-                    line_width_min_pixels=0,
-                    get_position=["lon", "lat"],
-                    get_radius="usa_r34_m",
-                    get_fill_color=[255, 140, 0],
-                    get_line_color=[0, 0, 0],)
-
-
-
-    layer_64 = pdk.Layer(
-
-            "ScatterplotLayer",
-            data=data[['usa_r64_m', 'lat', 'lon']],
-            pickable=True,
-                    opacity=0.008,
-                    stroked=True,
-                    filled=True,
-                    
-                    line_width_min_pixels=0,
-                    get_position=["lon", "lat"],
-                    get_radius="usa_r64_m",
-                    get_fill_color=[255, 140, 56],
-                    get_line_color=[0, 0, 0],)
-
-
-    layer_50 = pdk.Layer(
-
-            "ScatterplotLayer",
-            data=data[['usa_r50_m', 'lat', 'lon']],
-            pickable=True,
-                    opacity=0.008,
-                    stroked=True,
-                    filled=True,
-                    
-                    line_width_min_pixels=0,
-                    get_position=["lon", "lat"],
-                    get_radius="usa_r50_m",
-                    get_fill_color=[255, 80, 0],
-                    get_line_color=[0, 0, 0],)
-
-
-    st.write(pdk.Deck(
-        map_style = "mapbox://styles/mapbox/light-v9",
-        initial_view_state = {
-        "latitude": midpoint[0],
-        "longitude": midpoint[1],
-        "zoom": 6,
-        "pitch": 50
-
-        },
-        layers=[
-            
-            layer_34,
-            layer_50,
-            layer_64
-
-        ]
-    ))
+    data["COORDS"] = data[["lat", "lon"]].values.tolist()
+    data["COORDS"] = data['COORDS'].apply(lambda x: (x[0], x[1]))
+    data["ISO"] = data['COORDS'].apply(get_iso)
 
  
-    paths = data.groupby(["SID", "ISO"]).agg({"COORDS": agg_coords, 'iso_time': max_min, 'lon': 'first', 'lat':'first'}).reset_index().rename(columns = {"ISO_TIME": "TOTAL_HOURS_IN_LAND", "lon":"COORD_1", "lat":"COORD_2"})
+    paths = data.groupby(["ISO"]).agg({"COORDS": agg_coords, 'iso_time': max_min, 'lon': 'first', 'lat':'first'}).reset_index().rename(columns = {"ISO_TIME": "TOTAL_HOURS_IN_LAND", "lon":"COORD_1", "lat":"COORD_2"})
     
     paths["DISTANCE_TRACK_VINCENTY"] = paths.COORDS.apply(tot_dist)
 
@@ -371,10 +309,15 @@ if __name__ == "__main__":
     df_sb = pd.DataFrame(one_encoder_SUB_BASIN.transform(paths[['SUB_BASIN']]).toarray(),
     columns=one_encoder_SUB_BASIN.get_feature_names())
     paths = pd.concat([df_gc,df_ms,df_na,df_sb,paths],axis=1)
-    paths.drop(columns=['NATURE', 'SUB_BASIN', 'GENERAL_CATEGORY', 'MONTH_START','SID',
+
+    paths.drop(columns=['NATURE', 'SUB_BASIN', 'GENERAL_CATEGORY', 'MONTH_START',
     'ISO', 'COORDS','iso_time'], axis=1, inplace=True)
     # paths.to_csv('./test1.csv')
-    
+
+    paths = paths.fillna(0.0)
+
+    st.write(paths)
+
 
     if st.checkbox("Show Raw data", False):
         st.subheader('Raw Data')

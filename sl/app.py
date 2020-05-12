@@ -250,11 +250,11 @@ if uploaded_file is not None:
 
     GENERAL_CATEGORY = st.sidebar.selectbox("Select GENERAL_CATEGORY", initial_df["GENERAL_CATEGORY"].unique(), 'Cat 4')
 
-    MAX_WIND     = st.sidebar.text_input("MAX_WIND", max(initial_df["MAX_WIND"].unique()))
-    MIN_PRES     = st.sidebar.text_input("MIN_PRES", max(initial_df["MIN_PRES"].unique()))
+    MAX_WIND     = st.sidebar.text_input("MAX_WIND", max(initial_df["MAX_WIND"]))
+    MIN_PRES     = st.sidebar.text_input("MIN_PRES", max(initial_df["MIN_PRES"]))
     SUB_BASIN     = st.sidebar.text_input("SUB BASIN", max(initial_df["SUB BASIN"].unique()))
     #MIN_DIST2LAND    = st.sidebar.text_input("MIN_DIST2LAND")
-    MAX_STORMSPEED   = st.sidebar.text_input("MAX_STORMSPEED", max(initial_df["MAX_STORMSPEED"].unique()))
+    MAX_STORMSPEED   = st.sidebar.text_input("MAX_STORMSPEED", max(initial_df["MAX_STORMSPEED"]))
     #OTAL_HOURS_EVENT = st.sidebar.text_input("TOTAL_HOURS_EVENT")
     #TOTAL_HOURS_IN_LAND = st.sidebar.text_input("TOTAL_HOURS_IN_LAND")
     NATURE = st.sidebar.text_input("NATURE", 5)
@@ -374,5 +374,5 @@ if st.button("Generate Score for metrics model"):
         if st.button("Generate prediction for uploaded data"):
             if  select_model == 'ensembled':
                passs
-                st.balloons()
+               st.balloons()
 
