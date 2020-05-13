@@ -22,4 +22,4 @@ Also, we have an updated version of feature importance after the last version of
 
 Due tho the high presence of outliers in the target variable, we think no hyperparameter tunning would improve the metrics in a considerable scale. What we are seeing here is a problem wth the nature of data itself. Maybe next step could be getting ride of outliers using HQR or applying this model to different clusters.
 
-
+6. New plots were added for final presentation. See folder plots.
