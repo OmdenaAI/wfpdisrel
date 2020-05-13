@@ -8,6 +8,7 @@ import reverse_geocoder as rg
 import math
 from geopy import distance
 from Custom_SVR.SVR import My_SVR_Model
+import json
 ### stream Lit UI
 import streamlit as st
 import pydeck as pdk
@@ -192,7 +193,8 @@ if __name__ == "__main__":
         data["COORDS"] = data['COORDS'].apply(lambda x: (x[0], x[1]))
         data["ISO"] = data['COORDS'].apply(get_iso)
         data["SID"] = 1
-        paths = data.groupby(["SID", "ISO"]).agg({"COORDS": agg_coords, 'iso_time': max_min}).reset_index().rename(columns = {"ISO_TIME": "TOTAL_HOURS_IN_LAND"})
+        paths = data.groupby(["SID", "ISO"]).agg({"COORDS": agg_coords, 'iso_time': max_min}).reset_index().rename(columns = {"iso_time": "TOTAL_HOURS_IN_LAND"})
+        countries = paths['ISO'].copy()
         paths["DISTANCE_TRACK_VINCENTY"] = paths.COORDS.apply(tot_dist)
 
         #ask for more features
@@ -220,37 +222,23 @@ if __name__ == "__main__":
         paths['MIN_DIST2LAND'] = 0
         paths['GDP per capita (constant 2010 US$)'] = 8607.657082
         paths["Adjusted savings: education expenditure (% of GNI)"] = 2.8678781
-        paths['Net flows from UN agencies US$'] = 1620000.005
-
-        paths['TOTAL_HOURS_IN_LAND'] = 100
+        paths['Net flows from UN agencies US$'] = 0
 
         if st.checkbox("Show Raw data", False):
             st.subheader('Raw Data')
             st.write(paths)
             st.write(data)
+        algorithm = st.selectbox("Select the algorithm", ['SVR','NN', "RF"])
+        if os.path.exists(f'./{algorithm.lower()}-data.json'):
+            with open(f'./{algorithm.lower()}-data.json','r') as datafile:
+                mae = json.load(datafile)
+                mae = mae[algorithm.lower()]
+                mae = mae['mae']
+                st.write(f'{mae} is the mean absolute error')
+            pass
+
         if st.button("Generate Score for metrics model"):
             model = My_SVR_Model(init_data)
-            print(paths.info())
             output = model.infer(paths)
-            st.write(f'The predicted affected population is {output}')
+            st.write(pd.concat([countries,pd.Series(output,name='Population Affected')],axis=1))
             st.balloons()
-
-
-# self.num_features = ['TOTAL_HOURS_IN_LAND', 'MAX_WIND', 'MIN_PRES', 'MIN_DIST2LAND', 'V_LAND_KN',
-#                'RURAL_POP(%)', 'HDI', 'GDP per capita (constant 2010 US$)', 'Net flows from UN agencies US$',
-#                "Adjusted savings: education expenditure (% of GNI)", 'TOTAL_AFFECTED']
-# 'TOTAL_HOURS_IN_LAND' - checked
-# 'MAX_WIND' - checked
-# 'MIN_PRES' - checked
-# 'V_LAND_KN' - checked
-# 'MIN_DIST2LAND' -checked
-# 'RURAL_POP(%)' - checked
-# 'Net flows from UN agencies US$' - checked
-# 'HDI' - checked
-# 'GDP per capita (constant 2010 US$)' - checked
-# "Adjusted savings: education expenditure (% of GNI)" - checked
-
-
-# All catergorical are available
-# self.cat_features = ['GENERAL_CATEGORY', 'MONTH_END', 'SUB BASIN', 'NATURE']
-

@@ -6,6 +6,7 @@ from sklearn.svm import SVR
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.externals import joblib
 import os
+import json
 
 
 class My_SVR_Model:
@@ -82,9 +83,21 @@ class My_SVR_Model:
         grid_search_svr = GridSearchCV(svr, svm_param, n_jobs=-1)
         grid_search_svr.fit(train_x, train_y)
         y_pred_man_svr = grid_search_svr.predict(test_x)
-        print(f'mean absolute error : {mean_absolute_error(y_pred_man_svr, test_y)}')
-        print(f'mean squared error : {mean_squared_error(y_pred_man_svr, test_y)}')
-        print(f'root mean squared error : {np.sqrt(mean_squared_error(y_pred_man_svr,test_y))}')
+        mae = mean_absolute_error(y_pred_man_svr, test_y)
+        mse = mean_squared_error(y_pred_man_svr, test_y)
+        rmse = np.sqrt(mean_squared_error(y_pred_man_svr,test_y))
+        print(f'mean absolute error : {mae}')
+        print(f'mean squared error : {mse}')
+        print(f'root mean squared error : {rmse}')
+        data = {
+            "svr" : {
+                "mae" : mae,
+                "mse" : mse,
+                "rmse" : rmse
+            }
+        }
+        with open('svr-data.json','w') as outfile:
+            json.dump(data,outfile)
         joblib.dump(grid_search_svr, 'svr_model.pkl')
 
     def infer(self,df):
