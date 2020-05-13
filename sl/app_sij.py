@@ -2,11 +2,7 @@ import streamlit  as st
 
 from sklearn.svm import SVR
 from sklearn.pipeline import Pipeline
-#from sklearn.preprocessing import StandardScaler
-#from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import train_test_split
-# ??? Perform min_max_scaler to YEAR, TOTAL_HRS,MONTH
-#from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import reverse_geocoder as rg
 
 import math 
@@ -14,7 +10,7 @@ import pandas as pd
 import numpy as np
 import pydeck as pdk
 
-#preprocessing
+
 import geopy
 import pickle
 import datetime
@@ -75,9 +71,9 @@ features = ['season',
 'MIN_PRES',
 'MIN_DIST2LAND',
 'MAX_STORMSPEED',
-#'MAX_USA_SSHS',
-#'MAX_USA_SSHS_INLAND',
-#'V_LAND_KN',
+'MAX_USA_SSHS',
+'MAX_USA_SSHS_INLAND',
+'V_LAND_KN',
 'POP_DEN_SQ_KM',
 'RURAL_POP',
 'HDI',
@@ -91,8 +87,8 @@ features = ['season',
 'POP_MAX_34_ADJ',
 'POP_MAX_50_ADJ',
 'POP_MAX_64_ADJ',
-#'MAX_SSH_7',
-#'MAX_SSH_SS',
+'MAX_SSH_7',
+'MAX_SSH_SS',
 'Expectancy_break',
 'cereal_break',
 'cereal_break_two',
@@ -269,7 +265,7 @@ if uploaded_file is not None:
     TOTAL_HOURS_EVENT = st.sidebar.text_input("TOTAL_HOURS_EVENT")
     TOTAL_HOURS_IN_LAND = st.sidebar.text_input("TOTAL_HOURS_IN_LAND")
     NATURE = st.sidebar.text_input("NATURE", 5)
-    #GENERAL_CATEGORY = st.sidebar.text_input("GENERAL_CATEGORY",5)
+    
 
 
     paths['MONTH_START'] = MONTH_START
@@ -321,8 +317,9 @@ if uploaded_file is not None:
 
     median_imputer = pickle.load(open('median.imp', 'rb'))
     OHenc = pickle.load(open('enc.encoder', 'rb'))
-    kmeans = pickle.load(open('kmeans.cluster', 'rb'))
     scale = pickle.load(open('scale.scaler', 'rb'))
+
+    kmeans = pickle.load(open('kmeans.cluster', 'rb'))
 
     ## Load Keras model
     json_file = open('keras.json', 'r')
@@ -353,7 +350,6 @@ if uploaded_file is not None:
 
 
     km_pred = kmeans.predict(X).reshape(-1, 1)
-
     X = np.column_stack((X, km_pred))
     
 
