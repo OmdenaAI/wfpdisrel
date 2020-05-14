@@ -218,7 +218,7 @@ def build_model():
 
   clf.add(Dense(256, kernel_initializer='random_normal'))
   clf.add(BatchNormalization())
-  clf.add(Dropout(0.3))
+  clf.add(ReLU())
 
   clf.add(Dense(512, kernel_initializer='random_normal'))
   clf.add(BatchNormalization())

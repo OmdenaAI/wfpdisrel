@@ -117,6 +117,6 @@ class My_NN_Model:
         # preprocess inference file
 
         df = self.preprocessing(df)
-        pred = self.keras_model.predict(df)**2
+        pred = 10**self.keras_model.predict(df)
 
         return(pred.copy().reshape(-1))
