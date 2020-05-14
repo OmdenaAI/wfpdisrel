@@ -47,7 +47,6 @@ object_cols = ['MONTH_START',
  'SUBINCOME']
 
 features = ['season',
- 'TOTAL_HOURS_EVENT',
  'TOTAL_HOURS_IN_LAND',
  'MAX_WIND',
  'MIN_PRES',
@@ -124,7 +123,7 @@ features = ['season',
  'SUBINCOME_3',
  'SUBINCOME_5']
 
-log_cols = ['TOTAL_HOURS_EVENT', 'TOTAL_HOURS_IN_LAND', 
+log_cols = ['TOTAL_HOURS_IN_LAND', 
             'POP_DEN_SQ_KM', 'Arable land (hectares per person)',
             'POP_MAX_34_ADJ', 'POP_MAX_50_ADJ', 'POP_MAX_64_ADJ']
 

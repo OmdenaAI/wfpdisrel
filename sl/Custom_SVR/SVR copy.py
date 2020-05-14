@@ -71,7 +71,34 @@ class My_SVR_Model:
             test_x[col] = self.ss_scaler.transform(test_x[[col]])
             # joblib.dump(ss_scaler, f'std_scaler_{col}.bin', compress=True)
     
+        self.train_model(train_x, train_y, test_x, test_y)
 
+    def train_model(self, train_x, train_y, test_x, test_y):
+        svm_param = {'kernel' : ('linear', 'poly', 'rbf'),
+         'C' : [1,5,10,100],
+         'degree' : [3,8],
+         'coef0' : [0.01,10,0.5],
+         'gamma' : ('auto','scale')},
+        svr = SVR()
+        grid_search_svr = GridSearchCV(svr, svm_param, n_jobs=-1)
+        grid_search_svr.fit(train_x, train_y)
+        y_pred_man_svr = grid_search_svr.predict(test_x)
+        mae = mean_absolute_error(y_pred_man_svr, test_y)
+        mse = mean_squared_error(y_pred_man_svr, test_y)
+        rmse = np.sqrt(mean_squared_error(y_pred_man_svr,test_y))
+        print(f'mean absolute error : {mae}')
+        print(f'mean squared error : {mse}')
+        print(f'root mean squared error : {rmse}')
+        data = {
+            "svr" : {
+                "mae" : mae,
+                "mse" : mse,
+                "rmse" : rmse
+            }
+        }
+        with open('svr-data.json','w') as outfile:
+            json.dump(data,outfile)
+        joblib.dump(grid_search_svr, 'svr_model.pkl')
 
     def infer(self,df):
         pickleFile = 'svr_model.pkl'

@@ -1,0 +1,15 @@
+pandas==0.23.4
+numpy==1.16.4
+streamlit==0.59.0
+pydeck==0.3.1
+Keras==2.3.1
+reverse_geocoder==1.5.1
+matplotlib==2.1.2
+geopy==1.21.0
+fiona==1.8.13.post1
+geopandas==0.7.0
+rasterio==1.1.4
+rasterstats==0.14.0
+scikit_learn==0.23.0
+Shapely==1.7.0
+xgboost==1.0.2
